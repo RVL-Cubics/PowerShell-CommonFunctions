@@ -2,7 +2,6 @@
 .SYNOPSIS
     Convert Base64 String to Byte Array or Plain Text String.
 .DESCRIPTION
-
 .EXAMPLE
     PS C:\>ConvertFrom-Base64String "QSBzdHJpbmcgd2l0aCBiYXNlNjQgZW5jb2Rpbmc="
     Convert Base64 String to String with Default Encoding.
@@ -15,39 +14,36 @@
 .INPUTS
     System.String
 #>
-function ConvertFrom-Base64String {
-    [CmdletBinding()]
-    [OutputType([byte[]], [string])]
-    param (
-        # Value to convert
-        [Parameter(Mandatory = $true, Position = 0, ValueFromPipeline = $true)]
-        [string[]] $InputObject,
-        # Use base64url variant
-        [Parameter (Mandatory = $false)]
-        [switch] $Base64Url,
-        # Output raw byte array
-        [Parameter (Mandatory = $false)]
-        [switch] $RawBytes,
-        # Encoding to use for text strings
-        [Parameter (Mandatory = $false)]
-        [ValidateSet("Ascii", "UTF32", "UTF7", "UTF8", "BigEndianUnicode", "Unicode")]
-        [string] $Encoding = "Default"
-    )
-
-    process {
-        $listBytes = New-Object object[] $InputObject.Count
-        for ($iString = 0; $iString -lt $InputObject.Count; $iString++) {
-            [string] $strBase64 = $InputObject[$iString]
-            if ($Base64Url) { $strBase64 = $strBase64.Replace('-', '+').Replace('_', '/').PadRight($strBase64.Length + (4 - $strBase64.Length % 4) % 4, '=') }
-            [byte[]] $outBytes = [System.Convert]::FromBase64String($strBase64)
-            if ($RawBytes) { $listBytes[$iString] = $outBytes }
-            else {
-                $outString = ([Text.Encoding]::$Encoding.GetString($outBytes))
-                Write-Output $outString
-            }
-        }
-        if ($RawBytes) {
-            return $listBytes
-        }
-    }
+[CmdletBinding()]
+[OutputType([byte[]], [string])]
+param (
+	# Value to convert
+	[Parameter(Mandatory = $true, Position = 0, ValueFromPipeline = $true)]
+	[string[]] $InputObject,
+	# Use base64url variant
+	[Parameter (Mandatory = $false)]
+	[switch] $Base64Url,
+	# Output raw byte array
+	[Parameter (Mandatory = $false)]
+	[switch] $RawBytes,
+	# Encoding to use for text strings
+	[Parameter (Mandatory = $false)]
+	[ValidateSet('Ascii', 'UTF32', 'UTF7', 'UTF8', 'BigEndianUnicode', 'Unicode')]
+	[string] $Encoding = 'Default'
+)
+process {
+	$listBytes = New-Object object[] $InputObject.Count
+	for ($iString = 0; $iString -lt $InputObject.Count; $iString++) {
+		[string] $strBase64 = $InputObject[$iString]
+		if ($Base64Url) { $strBase64 = $strBase64.Replace('-', '+').Replace('_', '/').PadRight($strBase64.Length + (4 - $strBase64.Length % 4) % 4, '=') }
+		[byte[]] $outBytes = [System.Convert]::FromBase64String($strBase64)
+		if ($RawBytes) { $listBytes[$iString] = $outBytes }
+		else {
+			$outString = ([Text.Encoding]::$Encoding.GetString($outBytes))
+			Write-Output $outString
+		}
+	}
+	if ($RawBytes) {
+		return $listBytes
+	}
 }
